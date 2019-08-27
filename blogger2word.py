@@ -13,11 +13,13 @@ from datetime import date
 import requests
 from urllib import request
 from bs4 import BeautifulSoup
+from bs4 import UnicodeDammit
 
 # Office-docx lib import
 import docx
-from docx.shared import Cm, Pt  #加入可調整的 word 單位
-from docx.enum.text import WD_ALIGN_PARAGRAPH #處理字串的置中
+from docx.shared import Cm, Pt  #add unit for word
+from docx.enum.text import WD_ALIGN_PARAGRAPH # deal with alignment
+from docx.shared import RGBColor
 
 # ===== TODO ===== #
 # 1.
@@ -37,7 +39,6 @@ test_url_02 = "http://lulwechange.blogspot.com/2018/10/blog-post_21.html" # with
 
 
 # ====== functions ===== #
-
 def blogger_to_year_list(blogger_url):
     pass
 
@@ -50,7 +51,7 @@ def single_page_to_content(url):
     target = url
     res = requests.get(target)
     if res.status_code == requests.codes.ok:
-        soup = BeautifulSoup(res.text, "html.parser")
+        soup = BeautifulSoup(res.text, "lxml")
 
         # page basic info
         # title
@@ -79,7 +80,7 @@ def single_page_to_content(url):
 
 
         # save to txt
-        with open("tmp/tmp.txt", "w") as f:
+        with open("tmp/tmp.txt", "w", encoding='utf-8') as f:
             f.write(str(main_tag[0]))
 
         # read txt, tranfer, and save to docx
@@ -87,7 +88,7 @@ def single_page_to_content(url):
         txt_line_to_docx("tmp/tmp.txt", docx_name, page_title, date_str, tags_list)
 
         # Done
-        print("Page: " + date + "_" + page_title + " -----Saved.")
+        print("Page: " + date + "_" + page_title + " -> Saved.")
 
     else:
         print("Get " + url + " Failed!!")
@@ -96,34 +97,36 @@ def single_page_to_content(url):
 # read txt, tranfer, and save to docx
 def txt_line_to_docx(txt_name, docx_name, title, date, tags_list):
 
-    with open(txt_name, "r") as r:
+    with open(txt_name, "r", encoding='utf-8') as r:
     
         # check line style and write to docx
         doc = docx.Document()
         doc.add_heading(title, level=1)
         doc.add_heading(date, level=3)
-
         tags_str = ""
         for tag in tags_list:
             tags_str += "#" + tag + "; "
         doc.add_heading(tags_str, level=3)
+        doc.add_paragraph("")
 
         for line in r:
-
             # end of main content
             if u"張貼者" in line:
                 break
-
+            # get rid of repeated header info    
+            if "date-header" in line or "entry-title" in line or "post-header" in line:
+                continue
+            if line.strip() == title.strip():
+                continue
 
             soup_line = BeautifulSoup(line, "lxml")
             
-
             # check if href in line
             if soup_line.findAll('a', href=True):
                 text = soup_line.text.strip()
                 url = soup_line.findAll('a', href=True)[0]['href']
 
-                # img    
+                # img
                 if url.split(".")[-1] == "jpg" or url.split(".")[-1] == "png" or url.split(".")[-1] == "bmp":
                     request.urlretrieve(url,"tmp/tmp.jpg")
                     doc.add_picture("tmp/tmp.jpg", width=Cm(11))
@@ -140,9 +143,11 @@ def txt_line_to_docx(txt_name, docx_name, title, date, tags_list):
                 if soup_line.text.strip() == "":
                     continue 
                 else:
+
                     if "<tr>" in line:
                         paragraph = doc.add_paragraph(soup_line.text)
                         paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
+                        paragraph
                     else:
                          paragraph = doc.add_paragraph(soup_line.text)
 
