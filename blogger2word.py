@@ -23,27 +23,25 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH # deal with alignment
 from docx.shared import RGBColor
 
 # ===== TODO ===== #
-# 1.
-# 2.
-# 3.
+# 1. css code
+# 2. to pyinstaller
+# 3. write a ui
 
 
 # ===== Page Structure ===== #
 # Blogger -> YearMonth -> Page
 # Page -> [Title, Date, MainContent]
-# MainContent -> 
 
 
 # ===== Global Variables ===== #
 base_blogger_url = "http://lulwechange.blogspot.com/"
 root_blogger_dir = "blogger/"
-start_year = 2016
+start_year = 2015
+end_year = 2019
 #end_year = int(datetime.now().year) 
-end_year = 2016
 
 YearMonth_list =[]
 path_url_list = []
-
 
 test_url_01 = "http://lulwechange.blogspot.com/2018/12/1.html" # with pic
 test_url_02 = "http://lulwechange.blogspot.com/2018/10/blog-post_21.html" # with pics & font layout
