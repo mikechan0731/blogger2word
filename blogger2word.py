@@ -6,9 +6,9 @@
 # OS import
 import os
 import random
-import sqlite3
 from datetime import datetime, date
 import time
+import re
 
 # Parser import
 import requests
@@ -210,7 +210,10 @@ def single_page_to_content(save_path, page_url):
 
         # read txt, tranfer, and save to docx
         docx_name = date + "_" + page_title + ".docx"
-        txt_line_to_docx("tmp/tmp.txt", save_path, docx_name, page_title, date_str, tags_list)
+        checked_docx_name = docx_name.replace("\\","-").replace("/","-").replace("|","-").replace("?","")\
+            .replace('\"',"").replace("*","-").replace(":","-").replace("<","-").replace(">","-")
+
+        txt_line_to_docx("tmp/tmp.txt", save_path, checked_docx_name, page_title, date_str, tags_list)
 
         # Done
         print("Page: " + date + "_" + page_title + " -> Saved.")
@@ -251,7 +254,8 @@ def txt_line_to_docx(txt_name, docx_path, docx_name, title, date, tags_list):
                 url = soup_line.findAll('a', href=True)[0]['href']
 
                 # img
-                if url.split(".")[-1].lower() == "jpg" or url.split(".")[-1].lower() == "png" or url.split(".")[-1].lower() == "bmp":
+                if url.split(".")[-1].lower() == "jpg" or url.split(".")[-1].lower() == "png" or \
+                    url.split(".")[-1].lower() == "bmp" or url.split(".")[-1].lower() == "jpeg":
                     request.urlretrieve(url,"tmp/tmp.jpg")
                     doc.add_picture("tmp/tmp.jpg", width=Cm(11))
                     last_paragraph = doc.paragraphs[-1] 
@@ -274,10 +278,11 @@ def txt_line_to_docx(txt_name, docx_path, docx_name, title, date, tags_list):
                         paragraph
                     else:
                          paragraph = doc.add_paragraph(soup_line.text)
-
         
         # save docx
         doc.save(docx_path + docx_name)
+
+
 
 
 # ====== main() ===== #
@@ -310,9 +315,11 @@ def main():
     BloggerList_parsing("BloggerList.txt") # return path_url_list
   
 
-    #print("** .docx Saving...")
+    print("** .docx Saving...")
     for path_url in path_url_list:
         single_page_to_content(path_url[0], path_url[1])
+
+
 
     print("===== Blogger2Word Done! ======")
 
