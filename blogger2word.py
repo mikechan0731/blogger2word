@@ -37,7 +37,10 @@ from docx.shared import RGBColor
 # ===== Global Variables ===== #
 base_blogger_url = "http://lulwechange.blogspot.com/"
 root_blogger_dir = "blogger/"
-start_year = 2015
+start_year = 2016
+#end_year = int(datetime.now().year) 
+end_year = 2016
+
 YearMonth_list =[]
 path_url_list = []
 
@@ -91,8 +94,7 @@ def is_article_exists(url):
 
 # ====== Functions ===== #
 def blogger_to_YearMonth_dir(blogger_url):
-    year_now = int(datetime.now().year) 
-    year_range = [year for year in range(start_year, year_now+1)]
+    year_range = [year for year in range(start_year, end_year+1)]
     month_range = [month for month in range(1,12+1)]
 
     # create folder by YearMonth
@@ -174,7 +176,7 @@ def single_page_to_content(save_path, page_url):
         # title
         blogger_title = soup.title.text.split(":")[0].strip()
         page_title = soup.title.text.split(":")[1].strip()
-        print(page_title)
+        #print(page_title)
 
         # date
         date_tag = soup.findAll("h2", class_ = "date-header")
@@ -190,14 +192,14 @@ def single_page_to_content(save_path, page_url):
                 date_arr.append(s)
                 s = ""   
         date = "{}{:0>2d}{:0>2d}".format(int(date_arr[0]), int(date_arr[1]), int(date_arr[2]))
-        print(date)
+        #print(date)
         
         # tag
         tags_tag = soup.findAll(rel="tag")
         tags_list = []
         for i in range(len(tags_tag)):
             tags_list.append(tags_tag[i].text)
-        print(tags_list)
+        #print(tags_list)
 
         # main content in page
         main_tag = soup.findAll(id="main")
@@ -216,7 +218,7 @@ def single_page_to_content(save_path, page_url):
         txt_line_to_docx("tmp/tmp.txt", save_path, checked_docx_name, page_title, date_str, tags_list)
 
         # Done
-        print("Page: " + date + "_" + page_title + " -> Saved.")
+        print(checked_docx_name + " -> Saved.")
         print("= = =")
     else:
         print("Get " + page_url + " Failed!!")
@@ -256,6 +258,7 @@ def txt_line_to_docx(txt_name, docx_path, docx_name, title, date, tags_list):
                 # img
                 if url.split(".")[-1].lower() == "jpg" or url.split(".")[-1].lower() == "png" or \
                     url.split(".")[-1].lower() == "bmp" or url.split(".")[-1].lower() == "jpeg":
+
                     request.urlretrieve(url,"tmp/tmp.jpg")
                     doc.add_picture("tmp/tmp.jpg", width=Cm(11))
                     last_paragraph = doc.paragraphs[-1] 
