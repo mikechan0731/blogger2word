@@ -1,9 +1,10 @@
-.vscode
+# vscode
+.vscode/
 
-*.docx
-
-*.txt
-
+# folder
 tmp
-
 blogger
+
+# file-type
+*.docx
+*.txt
